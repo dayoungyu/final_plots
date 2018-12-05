@@ -5,6 +5,7 @@ output:
     orientation: columns
     vertical_layout: fill
     source_code: embed
+    
 runtime: shiny
 ---
 
@@ -39,7 +40,7 @@ outcome_transform = cdc_df %>%
 
 Column {.sidebar}
 -----------------------------------------------------------------------
-These plots illustrate the relationship between prevalence of health outcomes and health factors (i.e. lack of insurance and health expenditure) in 500 major U.S. cities. Cities are regionalized into Midwest, Northeast, South, and West regions. The data come from the Centers for Disease Control and Prevention, and can be found [here](https://chronicdata.cdc.gov/500-Cities/500-Cities-City-level-Data-GIS-Friendly-Format-201/k56w-7tny/).
+These plots illustrate the relationship between prevalence of health outcomes and health factors (i.e. lack of insurance and health expenditure) in 500 major U.S. cities. Cities are regionalized into Midwest, Northeast, South, and West regions. The data come from the Centers for Disease Control and Prevention, and can be found [here](https://chronicdata.cdc.gov/500-Cities/500-Cities-City-level-Data-GIS-Friendly-Format-201/k56w-7tny/). The Git repository for this Shiny document can be found [here](https://github.com/dayoungyu/final_plots).
 
 ```{r}
 
