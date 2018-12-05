@@ -1,5 +1,5 @@
 ---
-title: "Flex Dashboard"
+title: "Health Outcomes in 500 Major U.S. Cities"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -18,7 +18,8 @@ library(stringr)
 ```
 
 ```{r, echo = FALSE}
-cdc_df = read_csv("./data/cdc_df.csv")
+cdc_df = read_csv("./data/cdc_df.csv") %>%
+  mutate(city_state = str_c(PlaceName, StateAbbr, sep = ", "))
 
 outcome_transform = cdc_df %>% 
   gather(key = outcome, value = prevalence, BPHIGH_AdjPrev, CANCER_AdjPrev, CHD_AdjPrev, COPD_AdjPrev,    DIABETES_AdjPrev, HIGHCHOL_AdjPrev, OBESITY_AdjPrev, PHLTH_AdjPrev, STROKE_AdjPrev) %>% 
@@ -32,70 +33,66 @@ outcome_transform = cdc_df %>%
                                   'OBESITY' = 'Obesity',
                                   'PHLTH' = 'Poor Physical Health',
                                   'STROKE' = 'Stroke')) %>%
-  select(StateAbbr, PlaceName, ACCESS2_AdjPrev, Population2010, Geolocation, health_exp, region, division, outcome, prevalence) 
+  select(city_state, ACCESS2_AdjPrev, Population2010, Geolocation, health_exp, region, division, outcome, prevalence) 
 ```
 
 
 Column {.sidebar}
 -----------------------------------------------------------------------
+These plots illustrate the relationship between prevalence of health outcomes and health factors (i.e. lack of insurance and health expenditure) in 500 major U.S. cities. Cities are regionalized into Midwest, Northeast, South, and West regions. The data come from the Centers for Disease Control and Prevention, and can be found [here](https://chronicdata.cdc.gov/500-Cities/500-Cities-City-level-Data-GIS-Friendly-Format-201/k56w-7tny/).
 
 ```{r}
-outcomes = outcome_transform %>% distinct(outcome) %>% pull()
 
-selectInput("outcome_choice", label = h3("Select health outcome"),
+outcomes = outcome_transform %>% distinct(outcome) %>% pull()
+regions = cdc_df %>% distinct(region) %>% pull()
+
+selectInput("outcome_choice", label = h3("Select Health Outcome"),
     choices = outcomes, 
-    selected = "CANCER_AdjPrev")
+    selected = "Cancer")
+
 ```
 
 
-Column {data-width=650}
------------------------------------------------------------------------
 
-### Chart A
+Column {data-width=600}
+-----------------------------------------------------------------------
+### Lack of Health Insurance on Health Outcome Prevalence
 
 ```{r}
 renderPlotly({outcome_transform %>%
-  mutate(text_label = str_c("Percent without Insurance: ", ACCESS2_AdjPrev)) %>%
+  mutate(text_label = city_state) %>%
   filter(outcome == input$outcome_choice) %>%
   plot_ly(x = ~ACCESS2_AdjPrev, y = ~prevalence, type = "scatter", mode = "markers",
-          alpha = 0.5,
-          color = ~region,
-          text = ~text_label
-          )
-})
-```
-
-Column {data-width=350}
------------------------------------------------------------------------
-
-### Chart B
-
-```{r}
-renderPlotly({cdc_df %>%
-  mutate(text_label = str_c("Percent without Insurance: ", ACCESS2_AdjPrev, '\nPrevalence of Cancer: ', CANCER_AdjPrev)) %>%
-  plot_ly(x = ~ACCESS2_AdjPrev, y = ~CANCER_AdjPrev, type = "scatter", mode = "markers",
           alpha = 0.5,
           color = ~region,
           text = ~text_label
           ) %>%
   layout(
     xaxis = list(title = "Lack of Insurance in City"),
-    yaxis = list(title = "Prevalence of Cancer")
+    yaxis = list(title = "Prevalence of Health Outcome")
   )
 })
 ```
 
-### Chart C
+
+Column {data-width=400}
+-----------------------------------------------------------------------
+
+### Health Expenditure by City and Health Outcome Prevalence
 
 ```{r}
-renderPlotly({cdc_df %>%
-  distinct(state, .keep_all = TRUE) %>%
-  mutate(text_label = str_c("Health Expenditures per Capita: ", health_exp, '\nState: ', StateAbbr)) %>%
-  mutate(region = fct_reorder(region, health_exp)) %>%
-  plot_ly(y = ~health_exp, color = ~region, type = "box", text = ~text_label) %>%
+renderPlotly({outcome_transform %>%
+  mutate(text_label = city_state) %>%
+  filter(outcome == input$outcome_choice) %>%
+  plot_ly(x = ~health_exp, y = ~prevalence, type = "scatter", mode = "markers",
+          alpha = 0.5,
+          color = ~region,
+          text = ~text_label
+          ) %>%
   layout(
-    xaxis = list(title = "Region"),
-    yaxis = list(title = "Health Expenditures per Capita per State")
+    xaxis = list(title = "Health Expenditure"),
+    yaxis = list(title = "Prevalence of Health Outcome (millions)")
   )
 })
 ```
+
