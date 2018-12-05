@@ -69,7 +69,7 @@ renderPlotly({outcome_transform %>%
           text = ~text_label
           ) %>%
   layout(
-    xaxis = list(title = "Lack of Insurance in City"),
+    xaxis = list(title = "Prevalence of Uninsured in City"),
     yaxis = list(title = "Prevalence of Health Outcome")
   )
 })
